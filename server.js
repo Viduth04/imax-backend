@@ -24,9 +24,9 @@ app.set("trust proxy", 1);
 // Middleware in server.js
 app.use(cors({
   origin: [
-    'http://localhost:5173', 
-    'https://imax-frontend-hygq92yyo-jmadheepa-1636s-projects.vercel.app',
-    /\.vercel\.app$/ // This allows ANY vercel.app subdomain to connect
+    'http://localhost:5173',
+    'https://imax-frontend.vercel.app',
+    'https://imax-frontend-hygq92yyo-jmadheepa-1636s-projects.vercel.app' // Add this exact one
   ],
   credentials: true
 }));
