@@ -21,15 +21,14 @@ const app = express();
 app.set("trust proxy", 1);
 
 // 2. CORRECT CORS SETUP
+// Middleware in server.js
 app.use(cors({
   origin: [
     'http://localhost:5173', 
     'https://imax-frontend-hygq92yyo-jmadheepa-1636s-projects.vercel.app',
-    'https://imax-frontend.vercel.app' // Replace with your main Vercel domain
+    /\.vercel\.app$/ // This allows ANY vercel.app subdomain to connect
   ],
-  credentials: true, // Allows cookies to be sent
-  methods: ["GET", "POST", "PUT", "DELETE"],
-  allowedHeaders: ["Content-Type", "Authorization"]
+  credentials: true
 }));
 
 app.use(express.json());
