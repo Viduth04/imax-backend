@@ -21,7 +21,10 @@ const app = express();
 
 // Middleware
 app.use(cors({
-  origin: 'http://localhost:5173',
+  origin: [
+    'http://localhost:5173', 
+    'https://imax-frontend-hygq92yyo-jmadheepa-1636s-projects.vercel.app'
+  ],
   credentials: true
 }));
 app.use(express.json());
