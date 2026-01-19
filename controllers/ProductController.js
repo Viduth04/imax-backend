@@ -142,14 +142,27 @@ export const updateProduct = async (req, res) => {
 
     // Handle Image Logic
     let keptImages = [];
-    if (req.body.existingImages) {
+    if (req.body.existingImages !== undefined) {
+      // existingImages was explicitly provided (could be empty array)
       keptImages = JSON.parse(req.body.existingImages);
     } else if (!req.files || req.files.length === 0) {
+      // No new files and no existingImages specified, keep all current images
       keptImages = product.images;
     }
 
+    // Normalize paths for comparison (remove leading slashes and normalize separators)
+    const normalizePath = (path) => {
+      if (!path) return '';
+      return path.replace(/\\/g, '/').replace(/^\/+/, '');
+    };
+
     // Delete removed images from server
-    const imagesToDelete = product.images.filter(img => !keptImages.includes(img));
+    const keptImagesNormalized = keptImages.map(normalizePath);
+    const imagesToDelete = product.images.filter(img => {
+      const normalizedImg = normalizePath(img);
+      return !keptImagesNormalized.includes(normalizedImg);
+    });
+    
     imagesToDelete.forEach(image => {
       const imagePath = getPublicPath(image);
       if (fs.existsSync(imagePath)) {
