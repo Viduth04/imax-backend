@@ -88,12 +88,21 @@ if (!fs.existsSync(uploadsPath)) {
   fs.mkdirSync(path.join(uploadsPath, 'products'), { recursive: true });
 }
 
-app.use('/uploads', express.static(uploadsPath, {
+// Serve static files with CORS and proper headers
+app.use('/uploads', (req, res, next) => {
+  // Log requests to uploads
+  console.log('📁 Static file request:', req.path);
+  next();
+}, express.static(uploadsPath, {
   setHeaders: (res, filePath) => {
     // Set CORS headers for images
     res.set('Access-Control-Allow-Origin', '*');
+    res.set('Access-Control-Allow-Methods', 'GET');
     res.set('Cross-Origin-Resource-Policy', 'cross-origin');
-  }
+    res.set('Cache-Control', 'public, max-age=31536000');
+  },
+  dotfiles: 'ignore',
+  index: false
 }));
 
 // Test endpoint to verify static file serving
