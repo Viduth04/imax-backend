@@ -11,6 +11,12 @@ import adminRoutes from './routes/AdminRoutes.js';
 import productRoutes from './routes/ProductRoutes.js';
 import orderRoutes from './routes/OrderRoutes.js';
 import paymentRoutes from './routes/payment-routes.js';
+import appointmentRoutes from './routes/AppointmentRoutes.js';
+import cartRoutes from './routes/CartRoutes.js';
+import technicianRoutes from './routes/TechnicianRoutes.js';
+import deletionRequestRoutes from './routes/deletionRequest.js';
+import feedbackRoutes from './routes/feedback.js';
+import supportTicketRoutes from './routes/supportTickets.js';
 
 dotenv.config();
 
@@ -21,17 +27,22 @@ const app = express();
 app.set("trust proxy", 1);
 
 // 2. DYNAMIC CORS SETUP
+// Allow localhost during dev, and Vercel deployments for this project.
 const allowedOrigins = [
   'http://localhost:5173',
-  'https://imax-frontend.vercel.app',
-  'https://imax-frontend-hygq92yyo-jmadheepa-1636s-projects.vercel.app'
-];
+  'http://localhost:3000',
+  process.env.FRONTEND_URL,
+].filter(Boolean);
 
 app.use(cors({
   origin: function (origin, callback) {
     // Allow requests with no origin (like mobile apps or Postman)
     if (!origin) return callback(null, true);
-    if (allowedOrigins.indexOf(origin) === -1) {
+
+    const isAllowedExplicit = allowedOrigins.includes(origin);
+    const isVercelDeployment = /\.vercel\.app$/.test(origin);
+
+    if (!isAllowedExplicit && !isVercelDeployment) {
       const msg = 'The CORS policy for this site does not allow access from the specified Origin.';
       return callback(new Error(msg), false);
     }
@@ -53,9 +64,16 @@ app.get('/', (req, res) => {
 // 4. API ROUTES
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
+app.use('/api/admin', adminRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/payments', paymentRoutes);
+app.use('/api/appointments', appointmentRoutes);
+app.use('/api/cart', cartRoutes);
+app.use('/api/technicians', technicianRoutes);
+app.use('/api/deletion-requests', deletionRequestRoutes);
+app.use('/api/feedback', feedbackRoutes);
+app.use('/api/support-tickets', supportTicketRoutes);
 
 // 5. GLOBAL ERROR HANDLER
 app.use((err, req, res, next) => {
