@@ -19,6 +19,7 @@ import feedbackRoutes from './routes/feedback.js';
 import supportTicketRoutes from './routes/supportTickets.js';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import fs from 'fs';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -80,8 +81,41 @@ app.use('/api/technicians', technicianRoutes);
 app.use('/api/deletion-requests', deletionRequestRoutes);
 app.use('/api/feedback', feedbackRoutes);
 app.use('/api/support-tickets', supportTicketRoutes);
-// Change this in server.js
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+// Serve static files from uploads directory
+const uploadsPath = path.join(__dirname, 'uploads');
+if (!fs.existsSync(uploadsPath)) {
+  fs.mkdirSync(uploadsPath, { recursive: true });
+  fs.mkdirSync(path.join(uploadsPath, 'products'), { recursive: true });
+}
+
+app.use('/uploads', express.static(uploadsPath, {
+  setHeaders: (res, filePath) => {
+    // Set CORS headers for images
+    res.set('Access-Control-Allow-Origin', '*');
+    res.set('Cross-Origin-Resource-Policy', 'cross-origin');
+  }
+}));
+
+// Test endpoint to verify static file serving
+app.get('/test-uploads', (req, res) => {
+  const uploadsDir = path.join(__dirname, 'uploads', 'products');
+  fs.readdir(uploadsDir, (err, files) => {
+    if (err) {
+      return res.json({ 
+        success: false, 
+        message: 'Cannot read uploads directory', 
+        error: err.message,
+        path: uploadsDir 
+      });
+    }
+    res.json({ 
+      success: true, 
+      count: files.length, 
+      files: files.slice(0, 10),
+      uploadsPath: uploadsDir 
+    });
+  });
+});
 
 // 5. GLOBAL ERROR HANDLER
 app.use((err, req, res, next) => {
