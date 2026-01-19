@@ -192,6 +192,14 @@ export const updateProduct = async (req, res) => {
     Object.assign(product, updateData);
     await product.save();
 
+    // Debug: Log the updated product
+    console.log('📝 Product updated:', {
+      id: product._id,
+      name: product.name,
+      images: product.images,
+      imageCount: product.images.length
+    });
+
     res.json({
       success: true,
       message: 'Product updated successfully',
