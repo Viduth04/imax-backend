@@ -17,6 +17,12 @@ import technicianRoutes from './routes/TechnicianRoutes.js';
 import deletionRequestRoutes from './routes/deletionRequest.js';
 import feedbackRoutes from './routes/feedback.js';
 import supportTicketRoutes from './routes/supportTickets.js';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 
 dotenv.config();
 
@@ -74,6 +80,7 @@ app.use('/api/technicians', technicianRoutes);
 app.use('/api/deletion-requests', deletionRequestRoutes);
 app.use('/api/feedback', feedbackRoutes);
 app.use('/api/support-tickets', supportTicketRoutes);
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // 5. GLOBAL ERROR HANDLER
 app.use((err, req, res, next) => {
