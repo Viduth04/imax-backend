@@ -13,7 +13,21 @@ const productSchema = new mongoose.Schema({
   category: {
     type: String,
     required: true,
-    enum: ['CPU', 'GPU', 'Motherboard', 'RAM', 'Storage', 'PSU', 'Case', 'Cooling', 'Peripherals', 'Accessories']
+    enum: [
+      'Laptops', 
+      'Desktops', 
+      'Processors (CPU)', 
+      'Motherboards', 
+      'RAM (Memory)', 
+      'Graphics Cards (GPU)', 
+      'Storage (SSD/HDD)', 
+      'Power Supplies (PSU)', 
+      'Monitors', 
+      'Casing', 
+      'Cooling Solutions', 
+      'Keyboards & Mice', 
+      'Accessories'
+    ]
   },
   brand: {
     type: String,
