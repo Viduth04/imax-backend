@@ -63,6 +63,16 @@ export const getProducts = async (req, res) => {
       .limit(limit * 1)
       .skip((page - 1) * limit);
 
+    // Debug: Log products with images
+    console.log('📦 Products fetched:', products.length);
+    products.forEach(p => {
+      if (p.images && p.images.length > 0) {
+        console.log(`  - ${p.name}: ${p.images.length} image(s)`, p.images);
+      } else {
+        console.log(`  - ${p.name}: No images`);
+      }
+    });
+
     res.json({
       success: true,
       products,
