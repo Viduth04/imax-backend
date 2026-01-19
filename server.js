@@ -80,6 +80,7 @@ app.use('/api/technicians', technicianRoutes);
 app.use('/api/deletion-requests', deletionRequestRoutes);
 app.use('/api/feedback', feedbackRoutes);
 app.use('/api/support-tickets', supportTicketRoutes);
+// Change this in server.js
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // 5. GLOBAL ERROR HANDLER

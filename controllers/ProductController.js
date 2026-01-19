@@ -6,10 +6,22 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Helper to get the absolute path to the public folder
+/**
+ * FIXED: Helper to get the absolute path. 
+ * On hosting (Render), we save to a folder inside the backend root, 
+ * not the frontend folder.
+ */
 const getPublicPath = (relativePath) => {
-  return path.join(__dirname, '../../frontend/public', relativePath);
+  // Normalize path: remove leading slash to prevent joining errors
+  const cleanPath = relativePath.startsWith('/') ? relativePath.substring(1) : relativePath;
+  return path.join(__dirname, '../', cleanPath);
 };
+
+// Ensure upload directory exists on the server start
+const uploadDir = path.join(__dirname, '../uploads/products');
+if (!fs.existsSync(uploadDir)) {
+  fs.mkdirSync(uploadDir, { recursive: true });
+}
 
 // Get all products with filtering and search
 export const getProducts = async (req, res) => {
@@ -79,7 +91,6 @@ export const getProduct = async (req, res) => {
 // Create product
 export const createProduct = async (req, res) => {
   try {
-    // Explicitly destructure to ensure all fields (especially description) are caught
     const { name, description, category, brand, price, quantity, status, specifications } = req.body;
 
     const productData = {
@@ -94,7 +105,6 @@ export const createProduct = async (req, res) => {
     };
 
     if (req.files && req.files.length > 0) {
-      // Ensure the path starts with /uploads so the frontend BASE_URL + path works
       productData.images = req.files.map(file => `/uploads/products/${file.filename}`);
     }
 
@@ -106,7 +116,6 @@ export const createProduct = async (req, res) => {
       product
     });
   } catch (error) {
-    // Cleanup files if DB save fails
     if (req.files) {
       req.files.forEach(file => {
         const filePath = getPublicPath(`/uploads/products/${file.filename}`);
@@ -117,7 +126,7 @@ export const createProduct = async (req, res) => {
   }
 };
 
-// --- CRITICAL UPDATE: FIXED UPDATE LOGIC ---
+// Update product
 export const updateProduct = async (req, res) => {
   try {
     const product = await Product.findById(req.params.id);
@@ -131,17 +140,15 @@ export const updateProduct = async (req, res) => {
       updateData.specifications = JSON.parse(req.body.specifications);
     }
 
-    // 1. Determine which images the user wants to KEEP
-    // In your React code, you append 'existingImages' to FormData
+    // Handle Image Logic
     let keptImages = [];
     if (req.body.existingImages) {
       keptImages = JSON.parse(req.body.existingImages);
     } else if (!req.files || req.files.length === 0) {
-        // Fallback: if no instruction provided, keep current images
-        keptImages = product.images;
+      keptImages = product.images;
     }
 
-    // 2. Physical File Deletion: Remove images that were deleted in the UI
+    // Delete removed images from server
     const imagesToDelete = product.images.filter(img => !keptImages.includes(img));
     imagesToDelete.forEach(image => {
       const imagePath = getPublicPath(image);
@@ -150,13 +157,12 @@ export const updateProduct = async (req, res) => {
       }
     });
 
-    // 3. Handle NEWLY uploaded images
+    // Handle newly uploaded files
     let newImageUrls = [];
     if (req.files && req.files.length > 0) {
       newImageUrls = req.files.map(file => `/uploads/products/${file.filename}`);
     }
 
-    // 4. Combine Kept Images + New Images
     updateData.images = [...keptImages, ...newImageUrls];
 
     // Apply updates
