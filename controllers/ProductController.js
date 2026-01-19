@@ -79,12 +79,22 @@ export const getProduct = async (req, res) => {
 // Create product
 export const createProduct = async (req, res) => {
   try {
+    // Explicitly destructure to ensure all fields (especially description) are caught
+    const { name, description, category, brand, price, quantity, status, specifications } = req.body;
+
     const productData = {
-      ...req.body,
-      specifications: req.body.specifications ? JSON.parse(req.body.specifications) : {}
+      name,
+      description,
+      category,
+      brand,
+      price: Number(price),
+      quantity: Number(quantity),
+      status: status || 'active',
+      specifications: specifications ? JSON.parse(specifications) : {}
     };
 
     if (req.files && req.files.length > 0) {
+      // Ensure the path starts with /uploads so the frontend BASE_URL + path works
       productData.images = req.files.map(file => `/uploads/products/${file.filename}`);
     }
 
@@ -96,7 +106,8 @@ export const createProduct = async (req, res) => {
       product
     });
   } catch (error) {
-    if (req.files && req.files.length > 0) {
+    // Cleanup files if DB save fails
+    if (req.files) {
       req.files.forEach(file => {
         const filePath = getPublicPath(`/uploads/products/${file.filename}`);
         if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
