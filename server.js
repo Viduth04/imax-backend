@@ -83,6 +83,7 @@ app.use('/api/feedback', feedbackRoutes);
 app.use('/api/support-tickets', supportTicketRoutes);
 // Serve static files from uploads directory
 const uploadsPath = path.join(__dirname, 'uploads');
+
 if (!fs.existsSync(uploadsPath)) {
   fs.mkdirSync(uploadsPath, { recursive: true });
   fs.mkdirSync(path.join(uploadsPath, 'products'), { recursive: true });
@@ -90,19 +91,14 @@ if (!fs.existsSync(uploadsPath)) {
 
 // Serve static files with CORS and proper headers
 app.use('/uploads', (req, res, next) => {
-  // Log requests to uploads
-  console.log('📁 Static file request:', req.path);
+  // This will show you exactly what path the browser is asking for in Render logs
+  console.log('🖼️ Image Request Path:', req.path);
   next();
 }, express.static(uploadsPath, {
-  setHeaders: (res, filePath) => {
-    // Set CORS headers for images
+  setHeaders: (res) => {
     res.set('Access-Control-Allow-Origin', '*');
-    res.set('Access-Control-Allow-Methods', 'GET');
     res.set('Cross-Origin-Resource-Policy', 'cross-origin');
-    res.set('Cache-Control', 'public, max-age=31536000');
-  },
-  dotfiles: 'ignore',
-  index: false
+  }
 }));
 
 // Test endpoint to verify static file serving
